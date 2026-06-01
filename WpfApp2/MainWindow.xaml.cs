@@ -19,6 +19,7 @@ namespace WpfApp2
             new PlaylistDialogService(),
             new JsonLibraryService(),
             new SongImportService(),
+            new SongEditDialogService(),
             initialLibraryPath);
         }
     }

@@ -25,7 +25,7 @@
                 <TextBlock Text="{Binding Name}" FontSize="44" FontWeight="Bold" Foreground="#1F3E5E"/>
                 <TextBlock Text="{Binding SongCountText}" FontSize="28" Foreground="#60798C" Margin="0,2,0,10"/>
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="? Play Playlist"
+                    <Button Content="Play Playlist"
                             Command="{Binding PlayPlaylistCommand}"
                             Background="{StaticResource AccB}"
                             Foreground="White"
@@ -58,6 +58,7 @@
                   AutoGenerateColumns="False"
                   ItemsSource="{Binding Songs}"
                   SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                   HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -65,7 +66,12 @@
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Play" IsEnabled="False"/>
-                    <MenuItem Header="Edit..." IsEnabled="False"/>
+                    <MenuItem Header="Edit..."
+                              Command="{Binding PlacementTarget.Tag.EditSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Delete"
+                              Command="{Binding PlacementTarget.Tag.DeleteSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                     <Separator/>
                     <MenuItem Header="Move Up" Command="{Binding MoveSongUpCommand}"/>
                     <MenuItem Header="Move Down" Command="{Binding MoveSongDownCommand}"/>

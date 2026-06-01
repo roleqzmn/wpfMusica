@@ -18,11 +18,14 @@ public class MainWindowViewModel : BaseViewModel
     private readonly IPlaylistDialogService _playlistDialogService;
     private readonly ILibraryService _libraryService;
     private readonly ISongImportService _songImportService;
+    private readonly ISongEditDialogService _songEditDialogService;
     private readonly RelayCommand _openAddPlaylistCommand;
     private readonly RelayCommand _renamePlaylistCommand;
     private readonly RelayCommand _deletePlaylistCommand;
     private readonly RelayCommand _showSongListCommand;
     private readonly RelayCommand _saveLibraryCommand;
+    private readonly RelayCommand _editSongCommand;
+    private readonly RelayCommand _deleteSongCommand;
     private bool _isHydratingLibrary;
     private bool _isLibraryLoaded;
     private object? _currentPage;
@@ -35,21 +38,32 @@ public class MainWindowViewModel : BaseViewModel
         IPlaylistDialogService playlistDialogService,
         ILibraryService libraryService,
         ISongImportService songImportService,
+        ISongEditDialogService songEditDialogService,
         string? initialLibraryPath = null)
     {
         _playlistDialogService = playlistDialogService;
         _libraryService = libraryService;
         _songImportService = songImportService;
+        _songEditDialogService = songEditDialogService;
 
         Songs = new ObservableCollection<Song>();
         Playlists = new ObservableCollection<Playlist>();
-        _songListPage = new SongListViewModel(Songs, Playlists, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+        _songListPage = new SongListViewModel(
+            Songs,
+            Playlists,
+            OnSelectedSongChangedFromPage,
+            OnPlaylistContentChanged,
+            DeleteSong);
 
         CreateLibraryCommand = new RelayCommand(CreateLibrary);
         OpenLibraryCommand = new RelayCommand(OpenLibrary);
         _saveLibraryCommand = new RelayCommand(SaveLibrary, CanSaveLibrary);
         SaveLibraryCommand = _saveLibraryCommand;
         ImportSongsCommand = new RelayCommand(ImportSongs, () => IsLibraryLoaded);
+        _editSongCommand = new RelayCommand(EditSong, CanEditSong);
+        EditSongCommand = _editSongCommand;
+        _deleteSongCommand = new RelayCommand(DeleteSong, CanDeleteSong);
+        DeleteSongCommand = _deleteSongCommand;
         _openAddPlaylistCommand = new RelayCommand(OpenAddPlaylist, () => IsLibraryLoaded);
         OpenAddPlaylistCommand = _openAddPlaylistCommand;
         _renamePlaylistCommand = new RelayCommand(RenamePlaylist, CanManagePlaylist);
@@ -79,6 +93,8 @@ public class MainWindowViewModel : BaseViewModel
     public ICommand OpenLibraryCommand { get; }
     public ICommand SaveLibraryCommand { get; }
     public ICommand ImportSongsCommand { get; }
+    public ICommand EditSongCommand { get; }
+    public ICommand DeleteSongCommand { get; }
     public ICommand OpenAddPlaylistCommand { get; }
     public ICommand RenamePlaylistCommand { get; }
     public ICommand DeletePlaylistCommand { get; }
@@ -122,6 +138,8 @@ public class MainWindowViewModel : BaseViewModel
                 _deletePlaylistCommand.RaiseCanExecuteChanged();
                 _showSongListCommand.RaiseCanExecuteChanged();
                 ((RelayCommand)ImportSongsCommand).RaiseCanExecuteChanged();
+                _editSongCommand.RaiseCanExecuteChanged();
+                _deleteSongCommand.RaiseCanExecuteChanged();
                 _saveLibraryCommand.RaiseCanExecuteChanged();
             }
         }
@@ -168,8 +186,112 @@ public class MainWindowViewModel : BaseViewModel
                 OnPropertyChanged(nameof(CurrentSongArtist));
                 OnPropertyChanged(nameof(CurrentSongCoverPath));
                 OnPropertyChanged(nameof(TotalTimeText));
+                _editSongCommand.RaiseCanExecuteChanged();
+                _deleteSongCommand.RaiseCanExecuteChanged();
             }
         }
+    }
+
+    private bool CanEditSong(object? parameter)
+    {
+        return IsLibraryLoaded && ResolveSongForEdit(parameter) is not null;
+    }
+
+    private void EditSong(object? parameter)
+    {
+        if (!IsLibraryLoaded)
+        {
+            return;
+        }
+
+        var song = ResolveSongForEdit(parameter);
+        if (song is null)
+        {
+            return;
+        }
+
+        var edited = _songEditDialogService.ShowEditSongDialog(song);
+        if (edited is null)
+        {
+            return;
+        }
+
+        var index = Songs.IndexOf(song);
+        if (index < 0)
+        {
+            index = Songs.ToList().FindIndex(s => s.Id == edited.Id);
+        }
+
+        if (index < 0)
+        {
+            return;
+        }
+
+        Songs[index] = edited;
+        SelectedSong = edited;
+
+        if (SelectedPlaylist is not null && CurrentPage is PlaylistViewModel)
+        {
+            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+        }
+
+        SaveCurrentStateToLibrary();
+        _libraryService.MarkDirty();
+    }
+
+    private Song? ResolveSongForEdit(object? parameter)
+    {
+        if (parameter is Song song)
+        {
+            return song;
+        }
+
+        return SelectedSong;
+    }
+
+    private bool CanDeleteSong(object? parameter)
+    {
+        return IsLibraryLoaded && ResolveSongForEdit(parameter) is not null;
+    }
+
+    private void DeleteSong(object? parameter)
+    {
+        if (!IsLibraryLoaded)
+        {
+            return;
+        }
+
+        var song = ResolveSongForEdit(parameter);
+        if (song is null)
+        {
+            return;
+        }
+
+        if (!Songs.Remove(song))
+        {
+            return;
+        }
+
+        foreach (var playlist in Playlists)
+        {
+            while (playlist.SongIds.Contains(song.Id))
+            {
+                playlist.SongIds.Remove(song.Id);
+            }
+        }
+
+        if (SelectedSong == song)
+        {
+            SelectedSong = Songs.FirstOrDefault();
+        }
+
+        if (SelectedPlaylist is not null && CurrentPage is PlaylistViewModel)
+        {
+            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+        }
+
+        SaveCurrentStateToLibrary();
+        _libraryService.MarkDirty();
     }
 
     public string CurrentSongTitle => SelectedSong?.Title ?? "-";

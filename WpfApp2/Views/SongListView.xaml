@@ -38,6 +38,7 @@
                   AutoGenerateColumns="False"
                   ItemsSource="{Binding FilteredSongs}"
                   SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                   HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -45,7 +46,12 @@
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Play" IsEnabled="False"/>
-                    <MenuItem Header="Edit..." IsEnabled="False"/>
+                    <MenuItem Header="Edit..."
+                              Command="{Binding PlacementTarget.Tag.EditSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Delete"
+                              Command="{Binding PlacementTarget.Tag.DeleteSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                     <Separator/>
                     <MenuItem Header="Add to playlist"
                               ItemsSource="{Binding Playlists}">

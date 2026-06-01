@@ -14,6 +14,7 @@ public class SongListViewModel : BaseViewModel
     private readonly Action<Song?> _onSelectedSongChanged;
     private readonly Action _onPlaylistContentChanged;
     private readonly RelayCommand _addSelectedSongToPlaylistCommand;
+    private readonly Action<Song?> _onDeleteSongRequested;
     private string _searchText = string.Empty;
     private Song? _selectedSong;
 
@@ -21,23 +22,27 @@ public class SongListViewModel : BaseViewModel
         ObservableCollection<Song> songs,
         ObservableCollection<Playlist> playlists,
         Action<Song?> onSelectedSongChanged,
-        Action onPlaylistContentChanged)
+        Action onPlaylistContentChanged,
+        Action<Song?> onDeleteSongRequested)
     {
         Songs = songs;
         Playlists = playlists;
         _onSelectedSongChanged = onSelectedSongChanged;
         _onPlaylistContentChanged = onPlaylistContentChanged;
+        _onDeleteSongRequested = onDeleteSongRequested;
         FilteredSongs = CollectionViewSource.GetDefaultView(Songs);
         FilteredSongs.Filter = FilterSong;
 
         _addSelectedSongToPlaylistCommand = new RelayCommand(AddSelectedSongToPlaylist, CanAddSelectedSongToPlaylist);
         AddSelectedSongToPlaylistCommand = _addSelectedSongToPlaylistCommand;
+        DeleteSongCommand = new RelayCommand(DeleteSelectedSong, CanDeleteSelectedSong);
     }
 
     public ObservableCollection<Song> Songs { get; }
     public ObservableCollection<Playlist> Playlists { get; }
     public ICollectionView FilteredSongs { get; }
     public ICommand AddSelectedSongToPlaylistCommand { get; }
+    public ICommand DeleteSongCommand { get; }
 
     public string SearchText
     {
@@ -60,8 +65,27 @@ public class SongListViewModel : BaseViewModel
             {
                 _onSelectedSongChanged(value);
                 _addSelectedSongToPlaylistCommand.RaiseCanExecuteChanged();
+                ((RelayCommand)DeleteSongCommand).RaiseCanExecuteChanged();
             }
         }
+    }
+
+    private bool CanDeleteSelectedSong(object? parameter)
+    {
+        return parameter is Song || SelectedSong is not null;
+    }
+
+    private void DeleteSelectedSong(object? parameter)
+    {
+        var song = parameter as Song ?? SelectedSong;
+        if (song is null)
+        {
+            return;
+        }
+
+        _onDeleteSongRequested(song);
+        _addSelectedSongToPlaylistCommand.RaiseCanExecuteChanged();
+        ((RelayCommand)DeleteSongCommand).RaiseCanExecuteChanged();
     }
 
     private bool CanAddSelectedSongToPlaylist(object? parameter)

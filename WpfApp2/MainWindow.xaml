@@ -50,8 +50,8 @@
                 </MenuItem>
                 <MenuItem Header="Songs" IsEnabled="{Binding IsLibraryLoaded}">
                     <MenuItem Header="_Import..." Command="{Binding ImportSongsCommand}"/>
-                    <MenuItem Header="_Edit..."/>
-                    <MenuItem Header="_Delete" Command="Delete"/>
+                    <MenuItem Header="_Edit..." Command="{Binding EditSongCommand}"/>
+                    <MenuItem Header="_Delete" Command="{Binding DeleteSongCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Playlist" IsEnabled="{Binding IsLibraryLoaded}">
                     <MenuItem Header="_New..." Command="{Binding OpenAddPlaylistCommand}"/>
