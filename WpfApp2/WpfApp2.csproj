@@ -10,10 +10,16 @@
 
   <ItemGroup>
     <None Remove="Resources\vinyl.ico" />
+    <None Remove="Resources\vinyl.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\vinyl.ico" />
+    <Resource Include="Resources\vinyl.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mvvm\" />
   </ItemGroup>
 
 </Project>

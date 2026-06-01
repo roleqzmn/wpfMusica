@@ -1,44 +1,36 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Windows;
-using System.Windows.Media.Imaging;
+using WpfApp2.ViewModels;
 
 namespace WpfApp2
 {
     public partial class AddWindow : Window
     {
-        public string _title { get; private set; }
-        public string _path { get; private set; }
+        private AddPlaylistViewModel? _currentViewModel;
 
         public AddWindow()
         {
-            _title = String.Empty;
-            _path = String.Empty;
             InitializeComponent();
+            DataContextChanged += AddWindow_DataContextChanged;
         }
 
-        private void BrowseAndAdd(object sender, RoutedEventArgs e)
+        private void AddWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "image files (*.png, *.jpg, *.jpeg)|*.png;*.jpg;*.jpeg";
-            if (openFileDialog.ShowDialog() == true)
+            if (_currentViewModel is not null)
             {
-                _path = openFileDialog.FileName;
-                Preview.Source = new BitmapImage(new Uri(_path));
+                _currentViewModel.RequestClose -= OnRequestClose;
+            }
+
+            _currentViewModel = e.NewValue as AddPlaylistViewModel;
+            if (_currentViewModel is not null)
+            {
+                _currentViewModel.RequestClose += OnRequestClose;
             }
         }
 
-        private void AddPlaylist(object sender, RoutedEventArgs e)
+        private void OnRequestClose(bool? dialogResult)
         {
-            _title = PlaylistNameTextBox.Text.Trim();
-            if (string.IsNullOrEmpty(_title))
-            {
-                return;
-            }
-
-            DialogResult = true;
+            DialogResult = dialogResult;
         }
-
-        private void Cancel(object sender, RoutedEventArgs e) { Close(); }
     }
 }

@@ -4,10 +4,26 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
+        xmlns:vm="clr-namespace:WpfApp2.ViewModels"
+        xmlns:views="clr-namespace:WpfApp2.Views"
         mc:Ignorable="d"
         Title="Musica" Height="600" Width="1000"
         MinHeight="480" MinWidth="800"
         Icon="/Resources/vinyl.ico">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:WelcomeViewModel}">
+            <views:WelcomeView/>
+        </DataTemplate>
+
+        <Style x:Key="LoadedOnlyVisibilityStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLibraryLoaded}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -22,22 +38,22 @@
         <DockPanel Grid.ColumnSpan="2" Grid.Row="0">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_Library">
-                    <MenuItem Header="_New..." />
-                    <MenuItem Header="_Open..." />
-                    <MenuItem Header="_Save" Command="Save"/>
+                    <MenuItem Header="_New..." Command="{Binding CreateLibraryCommand}" />
+                    <MenuItem Header="_Open..." Command="{Binding OpenLibraryCommand}" />
+                    <MenuItem Header="_Save" Command="{Binding SaveLibraryCommand}"/>
                 </MenuItem>
-                <MenuItem Header="Songs">
+                <MenuItem Header="Songs" IsEnabled="{Binding IsLibraryLoaded}">
                     <MenuItem Header="_Import..."/>
                     <MenuItem Header="_Edit..."/>
                     <MenuItem Header="_Delete" Command="Delete"/>
                 </MenuItem>
-                <MenuItem Header="_Playlist">
-                    <MenuItem Header="_New..." Click="OpenAddWindow"/>
+                <MenuItem Header="_Playlist" IsEnabled="{Binding IsLibraryLoaded}">
+                    <MenuItem Header="_New..." Command="{Binding OpenAddPlaylistCommand}"/>
                 </MenuItem>
             </Menu>
             <TextBox AcceptsReturn="True" />
         </DockPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Background="{StaticResource BrushBackground}">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Background="{StaticResource BrushBackground}" Style="{StaticResource LoadedOnlyVisibilityStyle}">
             <TextBlock FontSize="18" Padding="7" Margin="10" Foreground="White"><Bold>All Songs</Bold></TextBlock>
             <Grid Margin="10,0,10,6">
                 <Grid.ColumnDefinitions>
@@ -52,13 +68,14 @@
                         FontWeight="Bold"
                         Background="{StaticResource AccB}"
                         BorderThickness="0"
-                        Click="OpenAddWindow"/>
+                        Command="{Binding OpenAddPlaylistCommand}"/>
             </Grid>
             <ListBox x:Name="PlaylistsList"
                      Margin="10,0,10,10"
                      BorderThickness="0"
                      Background="Transparent"
                      Foreground="White"
+                     ItemsSource="{Binding Playlists}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
@@ -108,7 +125,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
-        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,10,0">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,10,0" Style="{StaticResource LoadedOnlyVisibilityStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="10"/>
@@ -125,7 +142,7 @@
                          VerticalContentAlignment="Center"
                          Padding="10,0"
                          FontSize="20"
-                         Text="Search songs..."
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          Foreground="Gray"/>
                 <Button Grid.Column="2"
                         Content="Import Songs"
@@ -140,7 +157,8 @@
                       IsReadOnly="True"
                       SelectionUnit="FullRow"
                       AutoGenerateColumns="False"
-                      SelectionChanged="SongsDataGrid_SelectionChanged"
+                      ItemsSource="{Binding Songs}"
+                      SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
                       HeadersVisibility="Column"
                       GridLinesVisibility="Horizontal"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -164,7 +182,7 @@
             </DataGrid>
         </Grid>
 
-        <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource BgBrush2}">
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource BgBrush2}" Style="{StaticResource LoadedOnlyVisibilityStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220"/>
                 <ColumnDefinition Width="*"/>
@@ -177,11 +195,11 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Border Width="40" Height="40" CornerRadius="4" Background="#557A7A7A" ClipToBounds="True">
-                    <Image x:Name="CurrentSongCover" Stretch="UniformToFill"/>
+                    <Image Stretch="UniformToFill" Source="{Binding CurrentSongCoverPath}"/>
                 </Border>
                 <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                    <TextBlock x:Name="CurrentSongTitleText" Foreground="White" FontSize="14" FontWeight="Bold" Text="-"/>
-                    <TextBlock x:Name="CurrentSongArtistText" Foreground="#D0D0D0" FontSize="12" Text="-"/>
+                    <TextBlock Foreground="White" FontSize="14" FontWeight="Bold" Text="{Binding CurrentSongTitle}"/>
+                    <TextBlock Foreground="#D0D0D0" FontSize="12" Text="{Binding CurrentSongArtist}"/>
                 </StackPanel>
             </Grid>
 
@@ -201,9 +219,9 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="40"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="CurrentTimeText" Text="0:00" Foreground="#D0D0D0" VerticalAlignment="Center" FontSize="12"/>
+                    <TextBlock Text="{Binding CurrentTimeText}" Foreground="#D0D0D0" VerticalAlignment="Center" FontSize="12"/>
                     <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="0" Height="14" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="0:00" Foreground="#D0D0D0" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
+                    <TextBlock Grid.Column="2" Text="{Binding TotalTimeText}" Foreground="#D0D0D0" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
                 </Grid>
             </Grid>
 
@@ -212,5 +230,21 @@
                 <Slider Width="90" Minimum="0" Maximum="100" Value="45" Height="14" VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
+
+        <ContentControl Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        Grid.RowSpan="2"
+                        Content="{Binding WelcomePage}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLibraryLoaded}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 </Window>

@@ -1,0 +1,52 @@
+<UserControl x:Class="WpfApp2.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Background="#EEEEEE">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="550">
+            <Image Source="/Resources/vinyl.png"
+                   Width="72"
+                   Height="72"
+                   HorizontalAlignment="Center"/>
+            <TextBlock Text="No Library Open"
+                       FontSize="40"
+                       FontWeight="Bold"
+                       Foreground="#1F3E5E"
+                       HorizontalAlignment="Center"
+                       Margin="0,8,0,0"/>
+            <TextBlock Text="Create a new music library or open an existing one."
+                       TextAlignment="Center"
+                       Foreground="#60798C"
+                       FontSize="20"
+                       Margin="0,10,0,0"/>
+
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Height="48"
+                        Content="Create New Library"
+                        Command="{Binding CreateLibraryCommand}"
+                        Background="#243C55"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="18"/>
+
+                <Button Grid.Column="2"
+                        Height="48"
+                        Content="Open Existing Library"
+                        Command="{Binding OpenLibraryCommand}"
+                        Background="{StaticResource AccB}"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="18"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

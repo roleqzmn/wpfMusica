@@ -23,13 +23,16 @@
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Border Background="LightGray" Width="80" Height="80">
                 <Grid>
-                    <Image x:Name="Preview" Stretch="UniformToFill"/>
+                    <Image Stretch="UniformToFill" Source="{Binding CoverPath}"/>
                     <TextBlock Text="No Cover" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=Preview, Path=Source}" Value="{x:Null}">
+                                    <DataTrigger Binding="{Binding CoverPath}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding CoverPath}" Value="">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -39,30 +42,24 @@
                 </Grid>
             </Border>
             <Border Background="Transparent" CornerRadius="15" Height="10"/>
-            <Button Width="110" Click="BrowseAndAdd">Browse cover...</Button>
+            <Button Width="110" Command="{Binding BrowseCoverCommand}">Browse cover...</Button>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="1">
             <TextBlock Grid.Row="0" Text="Name" FontSize="14" Foreground="Gray" />
             <Border Background="Transparent" Height="5"/>
-            <TextBox x:Name="PlaylistNameTextBox" Grid.Row="1" Width="180" Height="30" HorizontalAlignment="Left"/>
+            <TextBox x:Name="PlaylistNameTextBox"
+                     Grid.Row="1"
+                     Width="180"
+                     Height="30"
+                     HorizontalAlignment="Left"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
 
 
         <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
 
-            <Button Click="Cancel" Margin="10" Width="60" Height="20">Cancel</Button>
-            <Button Click="AddPlaylist" Margin="10" Width="60" Height="20" Background="{StaticResource AccB}">Save
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="IsEnabled" Value="True"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=PlaylistNameTextBox, Path=Text}" Value="">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <Button Command="{Binding CancelCommand}" Margin="10" Width="60" Height="20">Cancel</Button>
+            <Button Command="{Binding SaveCommand}" Margin="10" Width="60" Height="20" Background="{StaticResource AccB}">Save</Button>
 
         </StackPanel>
     </Grid>
