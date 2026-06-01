@@ -12,6 +12,7 @@ public class SongEditViewModel : BaseViewModel
     private readonly int _id;
     private readonly TimeSpan _duration;
     private readonly byte[] _audioData;
+    private readonly string _audioFileExtension;
 
     private string _title;
     private string _artist;
@@ -26,6 +27,7 @@ public class SongEditViewModel : BaseViewModel
         _id = song.Id;
         _duration = song.Duration;
         _audioData = song.AudioData;
+        _audioFileExtension = song.AudioFileExtension;
 
         _title = song.Title;
         _artist = song.Artist;
@@ -122,6 +124,7 @@ public class SongEditViewModel : BaseViewModel
             Genre.Trim(),
             Year,
             _duration,
+            _audioFileExtension,
             CoverPath,
             _coverData,
             _audioData);

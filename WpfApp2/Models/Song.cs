@@ -12,6 +12,7 @@ public class Song
         string genre,
         int year,
         TimeSpan duration,
+        string audioFileExtension,
         string coverPath,
         byte[]? coverData,
         byte[] audioData)
@@ -23,6 +24,7 @@ public class Song
         Genre = genre;
         Year = year;
         Duration = duration;
+        AudioFileExtension = string.IsNullOrWhiteSpace(audioFileExtension) ? ".mp3" : audioFileExtension;
         CoverPath = coverPath;
         CoverData = coverData;
         AudioData = audioData;
@@ -35,6 +37,7 @@ public class Song
     public string Genre { get; }
     public int Year { get; }
     public TimeSpan Duration { get; }
+    public string AudioFileExtension { get; }
     public string CoverPath { get; }
     public byte[]? CoverData { get; }
     public byte[] AudioData { get; }

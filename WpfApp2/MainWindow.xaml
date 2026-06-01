@@ -161,15 +161,15 @@
 
             <Grid Grid.Column="0" Margin="8,4">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="44"/>
+                    <ColumnDefinition Width="56"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Border Width="40" Height="40" CornerRadius="4" Background="#557A7A7A" ClipToBounds="True">
-                    <Image Stretch="UniformToFill" Source="{Binding CurrentSongCoverPath}"/>
+                <Border Width="56" Height="56" CornerRadius="4" Background="#557A7A7A" ClipToBounds="True">
+                    <Image Stretch="UniformToFill" Source="{Binding Player.CurrentSongCoverPath}"/>
                 </Border>
                 <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Foreground="White" FontSize="14" FontWeight="Bold" Text="{Binding CurrentSongTitle}"/>
-                    <TextBlock Foreground="#D0D0D0" FontSize="12" Text="{Binding CurrentSongArtist}"/>
+                    <TextBlock Foreground="White" FontSize="14" FontWeight="Bold" Text="{Binding Player.CurrentSongTitle}"/>
+                    <TextBlock Foreground="#D0D0D0" FontSize="12" Text="{Binding Player.CurrentSongArtist}"/>
                 </StackPanel>
             </Grid>
 
@@ -179,9 +179,9 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="❮❮" Foreground="White" FontSize="18" Margin="8,0"/>
-                    <TextBlock Text="▶" Foreground="White" FontSize="24" Margin="8,0"/>
-                    <TextBlock Text="❯❯" Foreground="White" FontSize="18" Margin="8,0"/>
+                    <Button Content="❮❮" Command="{Binding Player.PreviousCommand}" Foreground="White" FontSize="18" Margin="8,0" Background="Transparent" BorderThickness="0"/>
+                    <Button Content="{Binding Player.PlayPauseText}" Command="{Binding Player.PlayPauseCommand}" Foreground="White" FontSize="16" Margin="8,0" Background="Transparent" BorderThickness="0"/>
+                    <Button Content="❯❯" Command="{Binding Player.NextCommand}" Foreground="White" FontSize="18" Margin="8,0" Background="Transparent" BorderThickness="0"/>
                 </StackPanel>
                 <Grid Grid.Row="1" Margin="0,1,0,0">
                     <Grid.ColumnDefinitions>
@@ -189,21 +189,25 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="40"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding CurrentTimeText}" Foreground="#D0D0D0" VerticalAlignment="Center" FontSize="12"/>
-                    <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="0" Height="14" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="2" Text="{Binding TotalTimeText}" Foreground="#D0D0D0" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
+                    <TextBlock Text="{Binding Player.PositionText}" Foreground="#D0D0D0" VerticalAlignment="Center" FontSize="12"/>
+                    <Slider Grid.Column="1"
+                            Minimum="0"
+                            Maximum="{Binding Player.DurationSeconds}"
+                            Value="{Binding Player.PositionSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Height="14"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Player.RemainingText}" Foreground="#D0D0D0" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
                 </Grid>
             </Grid>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0">
                 <TextBlock Text="🔊" Foreground="White" FontSize="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                <Slider Width="90" Minimum="0" Maximum="100" Value="45" Height="14" VerticalAlignment="Center"/>
+                <Slider Width="90" Minimum="0" Maximum="100" Value="{Binding Player.Volume, Mode=TwoWay}" Height="14" VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
 
         <ContentControl Grid.Row="1"
                         Grid.ColumnSpan="2"
-                        Grid.RowSpan="2"
                         Content="{Binding WelcomePage}">
             <ContentControl.Style>
                 <Style TargetType="ContentControl">

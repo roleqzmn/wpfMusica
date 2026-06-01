@@ -17,6 +17,7 @@ public class SongDocument
     public string Genre { get; set; } = string.Empty;
     public int Year { get; set; }
     public double DurationSeconds { get; set; }
+    public string AudioFileExtension { get; set; } = ".mp3";
     public string? CoverDataBase64 { get; set; }
     public string AudioDataBase64 { get; set; } = string.Empty;
 }

@@ -52,6 +52,7 @@ public class SongImportService : ISongImportService
                 Genre = tag.FirstGenre ?? string.Empty,
                 Year = (int)tag.Year,
                 Duration = tagFile.Properties.Duration,
+                AudioFileExtension = Path.GetExtension(filePath),
                 CoverData = coverData,
                 AudioData = audioData
             };
@@ -66,6 +67,7 @@ public class SongImportService : ISongImportService
                 Genre = string.Empty,
                 Year = 0,
                 Duration = TimeSpan.Zero,
+                AudioFileExtension = Path.GetExtension(filePath),
                 CoverData = null,
                 AudioData = audioData
             };

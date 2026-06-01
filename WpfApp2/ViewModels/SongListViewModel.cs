@@ -1,5 +1,4 @@
 using System;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -14,7 +13,10 @@ public class SongListViewModel : BaseViewModel
     private readonly Action<Song?> _onSelectedSongChanged;
     private readonly Action _onPlaylistContentChanged;
     private readonly RelayCommand _addSelectedSongToPlaylistCommand;
+    private readonly RelayCommand _clearSearchCommand;
+    private readonly RelayCommand _playSongCommand;
     private readonly Action<Song?> _onDeleteSongRequested;
+    private readonly Action<Song?> _onPlaySongRequested;
     private string _searchText = string.Empty;
     private Song? _selectedSong;
 
@@ -23,19 +25,25 @@ public class SongListViewModel : BaseViewModel
         ObservableCollection<Playlist> playlists,
         Action<Song?> onSelectedSongChanged,
         Action onPlaylistContentChanged,
-        Action<Song?> onDeleteSongRequested)
+        Action<Song?> onDeleteSongRequested,
+        Action<Song?> onPlaySongRequested)
     {
         Songs = songs;
         Playlists = playlists;
         _onSelectedSongChanged = onSelectedSongChanged;
         _onPlaylistContentChanged = onPlaylistContentChanged;
         _onDeleteSongRequested = onDeleteSongRequested;
+        _onPlaySongRequested = onPlaySongRequested;
         FilteredSongs = CollectionViewSource.GetDefaultView(Songs);
         FilteredSongs.Filter = FilterSong;
 
         _addSelectedSongToPlaylistCommand = new RelayCommand(AddSelectedSongToPlaylist, CanAddSelectedSongToPlaylist);
         AddSelectedSongToPlaylistCommand = _addSelectedSongToPlaylistCommand;
         DeleteSongCommand = new RelayCommand(DeleteSelectedSong, CanDeleteSelectedSong);
+        _clearSearchCommand = new RelayCommand(ClearSearch, CanClearSearch);
+        ClearSearchCommand = _clearSearchCommand;
+        _playSongCommand = new RelayCommand(PlaySong, CanPlaySong);
+        PlaySongCommand = _playSongCommand;
     }
 
     public ObservableCollection<Song> Songs { get; }
@@ -43,6 +51,8 @@ public class SongListViewModel : BaseViewModel
     public ICollectionView FilteredSongs { get; }
     public ICommand AddSelectedSongToPlaylistCommand { get; }
     public ICommand DeleteSongCommand { get; }
+    public ICommand ClearSearchCommand { get; }
+    public ICommand PlaySongCommand { get; }
 
     public string SearchText
     {
@@ -52,6 +62,7 @@ public class SongListViewModel : BaseViewModel
             if (SetProperty(ref _searchText, value))
             {
                 FilteredSongs.Refresh();
+                _clearSearchCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -66,8 +77,25 @@ public class SongListViewModel : BaseViewModel
                 _onSelectedSongChanged(value);
                 _addSelectedSongToPlaylistCommand.RaiseCanExecuteChanged();
                 ((RelayCommand)DeleteSongCommand).RaiseCanExecuteChanged();
+                _playSongCommand.RaiseCanExecuteChanged();
             }
         }
+    }
+
+    private bool CanPlaySong(object? parameter)
+    {
+        return parameter is Song || SelectedSong is not null;
+    }
+
+    private void PlaySong(object? parameter)
+    {
+        var song = parameter as Song ?? SelectedSong;
+        if (song is null)
+        {
+            return;
+        }
+
+        _onPlaySongRequested(song);
     }
 
     private bool CanDeleteSelectedSong(object? parameter)
@@ -132,5 +160,15 @@ public class SongListViewModel : BaseViewModel
                || song.Artist.Contains(term, StringComparison.OrdinalIgnoreCase)
                || song.Album.Contains(term, StringComparison.OrdinalIgnoreCase)
                || song.Genre.Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool CanClearSearch()
+    {
+        return !string.IsNullOrWhiteSpace(SearchText);
+    }
+
+    private void ClearSearch()
+    {
+        SearchText = string.Empty;
     }
 }

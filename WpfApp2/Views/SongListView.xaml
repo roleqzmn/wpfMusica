@@ -14,6 +14,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="34"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
@@ -23,7 +24,15 @@
                      FontSize="20"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Foreground="Gray"/>
-            <Button Grid.Column="2"
+            <Button Grid.Column="1"
+                    Content="X"
+                    Command="{Binding ClearSearchCommand}"
+                    Margin="6,0,0,0"
+                    FontSize="14"
+                    Width="28"
+                    Height="28"
+                    VerticalAlignment="Center"/>
+            <Button Grid.Column="3"
                     Content="Import Songs"
                     Command="{Binding DataContext.ImportSongsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     Background="{StaticResource AccB}"
@@ -43,9 +52,16 @@
                   GridLinesVisibility="Horizontal"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick"
+                              Command="{Binding PlaySongCommand}"
+                              CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+            </DataGrid.InputBindings>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Play" IsEnabled="False"/>
+                    <MenuItem Header="Play"
+                              Command="{Binding PlacementTarget.DataContext.PlaySongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                     <MenuItem Header="Edit..."
                               Command="{Binding PlacementTarget.Tag.EditSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                               CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>

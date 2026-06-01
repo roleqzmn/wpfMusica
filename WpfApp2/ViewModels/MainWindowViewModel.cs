@@ -19,6 +19,7 @@ public class MainWindowViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly ISongImportService _songImportService;
     private readonly ISongEditDialogService _songEditDialogService;
+    private readonly PlayerViewModel _player;
     private readonly RelayCommand _openAddPlaylistCommand;
     private readonly RelayCommand _renamePlaylistCommand;
     private readonly RelayCommand _deletePlaylistCommand;
@@ -39,12 +40,14 @@ public class MainWindowViewModel : BaseViewModel
         ILibraryService libraryService,
         ISongImportService songImportService,
         ISongEditDialogService songEditDialogService,
+        IAudioPlayerService audioPlayerService,
         string? initialLibraryPath = null)
     {
         _playlistDialogService = playlistDialogService;
         _libraryService = libraryService;
         _songImportService = songImportService;
         _songEditDialogService = songEditDialogService;
+        _player = new PlayerViewModel(audioPlayerService);
 
         Songs = new ObservableCollection<Song>();
         Playlists = new ObservableCollection<Playlist>();
@@ -53,7 +56,8 @@ public class MainWindowViewModel : BaseViewModel
             Playlists,
             OnSelectedSongChangedFromPage,
             OnPlaylistContentChanged,
-            DeleteSong);
+            DeleteSong,
+            PlaySongFromSongList);
 
         CreateLibraryCommand = new RelayCommand(CreateLibrary);
         OpenLibraryCommand = new RelayCommand(OpenLibrary);
@@ -100,6 +104,7 @@ public class MainWindowViewModel : BaseViewModel
     public ICommand DeletePlaylistCommand { get; }
     public ICommand ShowSongListCommand { get; }
     public WelcomeViewModel WelcomePage { get; }
+    public PlayerViewModel Player => _player;
 
     public object? CurrentPage
     {
@@ -121,7 +126,7 @@ public class MainWindowViewModel : BaseViewModel
 
                 CurrentPage = value is null
                     ? _songListPage
-                    : new PlaylistViewModel(value, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+                    : new PlaylistViewModel(value, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged, PlaySongQueue);
             }
         }
     }
@@ -169,6 +174,7 @@ public class MainWindowViewModel : BaseViewModel
                 item.Genre,
                 item.Year,
                 item.Duration,
+                item.AudioFileExtension,
                 CreateCoverPath(item.CoverData),
                 item.CoverData,
                 item.AudioData));
@@ -232,7 +238,7 @@ public class MainWindowViewModel : BaseViewModel
 
         if (SelectedPlaylist is not null && CurrentPage is PlaylistViewModel)
         {
-            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged, PlaySongQueue);
         }
 
         SaveCurrentStateToLibrary();
@@ -287,7 +293,7 @@ public class MainWindowViewModel : BaseViewModel
 
         if (SelectedPlaylist is not null && CurrentPage is PlaylistViewModel)
         {
-            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged, PlaySongQueue);
         }
 
         SaveCurrentStateToLibrary();
@@ -444,6 +450,7 @@ public class MainWindowViewModel : BaseViewModel
                 song.Genre,
                 song.Year,
                 TimeSpan.FromSeconds(song.DurationSeconds),
+                string.IsNullOrWhiteSpace(song.AudioFileExtension) ? ".mp3" : song.AudioFileExtension,
                 CreateCoverPath(coverData),
                 coverData,
                 DecodeBase64(song.AudioDataBase64) ?? Array.Empty<byte>()));
@@ -452,7 +459,8 @@ public class MainWindowViewModel : BaseViewModel
         Playlists.Clear();
         foreach (var playlist in library.Playlists)
         {
-            Playlists.Add(new Playlist(playlist.Name, "/Resources/vinyl.ico", playlist.SongIds));
+            var playlistCoverData = DecodeBase64(playlist.CoverDataBase64);
+            Playlists.Add(new Playlist(playlist.Name, CreateCoverPath(playlistCoverData), playlist.SongIds));
         }
 
         SelectedPlaylist = null;
@@ -538,7 +546,26 @@ public class MainWindowViewModel : BaseViewModel
 
         if (SelectedPlaylist is not null && CurrentPage is PlaylistViewModel)
         {
-            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged);
+            CurrentPage = new PlaylistViewModel(SelectedPlaylist, Songs, OnSelectedSongChangedFromPage, OnPlaylistContentChanged, PlaySongQueue);
+        }
+    }
+
+    private void PlaySongFromSongList(Song? song)
+    {
+        if (song is null)
+        {
+            return;
+        }
+
+        _player.PlaySong(song, Songs);
+    }
+
+    private void PlaySongQueue(IReadOnlyList<Song> queue, int startIndex)
+    {
+        _player.PlayQueue(queue, startIndex);
+        if (startIndex >= 0 && startIndex < queue.Count)
+        {
+            SelectedSong = queue[startIndex];
         }
     }
 
@@ -556,6 +583,7 @@ public class MainWindowViewModel : BaseViewModel
                     Genre = song.Genre,
                     Year = song.Year,
                     DurationSeconds = song.Duration.TotalSeconds,
+                    AudioFileExtension = song.AudioFileExtension,
                     CoverDataBase64 = ToBase64(song.CoverData),
                     AudioDataBase64 = ToBase64(song.AudioData) ?? string.Empty
                 })

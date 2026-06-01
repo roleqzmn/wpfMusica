@@ -1,5 +1,4 @@
 using System;
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
@@ -12,7 +11,9 @@ public class PlaylistViewModel : BaseViewModel
 {
     private readonly Action<Song?> _onSelectedSongChanged;
     private readonly Action _onPlaylistContentChanged;
+    private readonly Action<IReadOnlyList<Song>, int> _onPlayQueueRequested;
     private readonly RelayCommand _playPlaylistCommand;
+    private readonly RelayCommand _playSongCommand;
     private readonly RelayCommand _removeSongCommand;
     private readonly RelayCommand _moveSongUpCommand;
     private readonly RelayCommand _moveSongDownCommand;
@@ -22,11 +23,13 @@ public class PlaylistViewModel : BaseViewModel
         Playlist playlist,
         ObservableCollection<Song> allSongs,
         Action<Song?> onSelectedSongChanged,
-        Action onPlaylistContentChanged)
+        Action onPlaylistContentChanged,
+        Action<IReadOnlyList<Song>, int> onPlayQueueRequested)
     {
         Playlist = playlist;
         _onSelectedSongChanged = onSelectedSongChanged;
         _onPlaylistContentChanged = onPlaylistContentChanged;
+        _onPlayQueueRequested = onPlayQueueRequested;
 
         Songs = new ObservableCollection<Song>(
             playlist.SongIds
@@ -38,6 +41,7 @@ public class PlaylistViewModel : BaseViewModel
             OnPropertyChanged(nameof(SongCount));
             OnPropertyChanged(nameof(SongCountText));
             _playPlaylistCommand.RaiseCanExecuteChanged();
+            _playSongCommand.RaiseCanExecuteChanged();
             _removeSongCommand.RaiseCanExecuteChanged();
             _moveSongUpCommand.RaiseCanExecuteChanged();
             _moveSongDownCommand.RaiseCanExecuteChanged();
@@ -45,6 +49,8 @@ public class PlaylistViewModel : BaseViewModel
 
         _playPlaylistCommand = new RelayCommand(PlayPlaylist, CanPlayPlaylist);
         PlayPlaylistCommand = _playPlaylistCommand;
+        _playSongCommand = new RelayCommand(PlaySelectedSong, CanPlaySelectedSong);
+        PlaySongCommand = _playSongCommand;
         _removeSongCommand = new RelayCommand(RemoveSelectedSong, CanRemoveSelectedSong);
         RemoveSongCommand = _removeSongCommand;
         _moveSongUpCommand = new RelayCommand(MoveSelectedSongUp, CanMoveSelectedSongUp);
@@ -56,6 +62,7 @@ public class PlaylistViewModel : BaseViewModel
     public Playlist Playlist { get; }
     public ObservableCollection<Song> Songs { get; }
     public ICommand PlayPlaylistCommand { get; }
+    public ICommand PlaySongCommand { get; }
     public ICommand RemoveSongCommand { get; }
     public ICommand MoveSongUpCommand { get; }
     public ICommand MoveSongDownCommand { get; }
@@ -73,6 +80,7 @@ public class PlaylistViewModel : BaseViewModel
             if (SetProperty(ref _selectedSong, value))
             {
                 _onSelectedSongChanged(value);
+                _playSongCommand.RaiseCanExecuteChanged();
                 _removeSongCommand.RaiseCanExecuteChanged();
                 _moveSongUpCommand.RaiseCanExecuteChanged();
                 _moveSongDownCommand.RaiseCanExecuteChanged();
@@ -93,6 +101,30 @@ public class PlaylistViewModel : BaseViewModel
         }
 
         SelectedSong = Songs[0];
+        _onPlayQueueRequested(Songs.ToList(), 0);
+    }
+
+    private bool CanPlaySelectedSong(object? parameter)
+    {
+        return parameter is Song || SelectedSong is not null;
+    }
+
+    private void PlaySelectedSong(object? parameter)
+    {
+        var song = parameter as Song ?? SelectedSong;
+        if (song is null)
+        {
+            return;
+        }
+
+        var index = Songs.IndexOf(song);
+        if (index < 0)
+        {
+            return;
+        }
+
+        SelectedSong = song;
+        _onPlayQueueRequested(Songs.ToList(), index);
     }
 
     private bool CanRemoveSelectedSong()

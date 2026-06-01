@@ -8,6 +8,7 @@ public class SongImportData
     public string Genre { get; set; } = string.Empty;
     public int Year { get; set; }
     public TimeSpan Duration { get; set; }
+    public string AudioFileExtension { get; set; } = ".mp3";
     public byte[]? CoverData { get; set; }
     public byte[] AudioData { get; set; } = Array.Empty<byte>();
 }
