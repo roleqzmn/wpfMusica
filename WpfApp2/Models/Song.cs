@@ -4,15 +4,28 @@ namespace WpfApp2.Models;
 
 public class Song
 {
-    public Song(int id, string title, string artist, string album, string genre, TimeSpan duration, string coverPath)
+    public Song(
+        int id,
+        string title,
+        string artist,
+        string album,
+        string genre,
+        int year,
+        TimeSpan duration,
+        string coverPath,
+        byte[]? coverData,
+        byte[] audioData)
     {
         Id = id;
         Title = title;
         Artist = artist;
         Album = album;
         Genre = genre;
+        Year = year;
         Duration = duration;
         CoverPath = coverPath;
+        CoverData = coverData;
+        AudioData = audioData;
     }
 
     public int Id { get; }
@@ -20,6 +33,9 @@ public class Song
     public string Artist { get; }
     public string Album { get; }
     public string Genre { get; }
+    public int Year { get; }
     public TimeSpan Duration { get; }
     public string CoverPath { get; }
+    public byte[]? CoverData { get; }
+    public byte[] AudioData { get; }
 }

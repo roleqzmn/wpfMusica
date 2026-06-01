@@ -15,7 +15,11 @@ namespace WpfApp2
         public MainWindow(string? initialLibraryPath = null)
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel(new PlaylistDialogService(), new JsonLibraryService(), initialLibraryPath);
+        DataContext = new MainWindowViewModel(
+            new PlaylistDialogService(),
+            new JsonLibraryService(),
+            new SongImportService(),
+            initialLibraryPath);
         }
     }
 }

@@ -7,4 +7,5 @@ namespace WpfApp2.Services;
 public interface IPlaylistDialogService
 {
     Playlist? ShowCreatePlaylistDialog();
+    Playlist? ShowEditPlaylistDialog(Playlist playlist);
 }

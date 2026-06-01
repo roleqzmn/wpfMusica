@@ -6,7 +6,7 @@ namespace WpfApp2
 {
     public partial class AddWindow : Window
     {
-        private AddPlaylistViewModel? _currentViewModel;
+    private PlaylistEditViewModel? _currentViewModel;
 
         public AddWindow()
         {
@@ -18,13 +18,13 @@ namespace WpfApp2
         {
             if (_currentViewModel is not null)
             {
-                _currentViewModel.RequestClose -= OnRequestClose;
+            _currentViewModel.CloseRequested -= OnRequestClose;
             }
 
-            _currentViewModel = e.NewValue as AddPlaylistViewModel;
+        _currentViewModel = e.NewValue as PlaylistEditViewModel;
             if (_currentViewModel is not null)
             {
-                _currentViewModel.RequestClose += OnRequestClose;
+            _currentViewModel.CloseRequested += OnRequestClose;
             }
         }
 

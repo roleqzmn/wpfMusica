@@ -25,6 +25,7 @@
                      Foreground="Gray"/>
             <Button Grid.Column="2"
                     Content="Import Songs"
+                    Command="{Binding DataContext.ImportSongsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     Background="{StaticResource AccB}"
                     BorderThickness="0"
                     Foreground="White"
@@ -41,6 +42,23 @@
                   GridLinesVisibility="Horizontal"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Play" IsEnabled="False"/>
+                    <MenuItem Header="Edit..." IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="Add to playlist"
+                              ItemsSource="{Binding Playlists}">
+                        <MenuItem.ItemContainerStyle>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding Name}"/>
+                                <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.AddSelectedSongToPlaylistCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Setter Property="CommandParameter" Value="{Binding}"/>
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="52" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>

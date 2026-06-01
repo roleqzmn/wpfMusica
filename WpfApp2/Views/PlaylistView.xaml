@@ -24,14 +24,31 @@
             <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="{Binding Name}" FontSize="44" FontWeight="Bold" Foreground="#1F3E5E"/>
                 <TextBlock Text="{Binding SongCountText}" FontSize="28" Foreground="#60798C" Margin="0,2,0,10"/>
-                <Button Content="? Play Playlist"
-                        Command="{Binding PlayPlaylistCommand}"
-                        Background="{StaticResource AccB}"
-                        Foreground="White"
-                        BorderThickness="0"
-                        Width="180"
-                        Height="36"
-                        HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="? Play Playlist"
+                            Command="{Binding PlayPlaylistCommand}"
+                            Background="{StaticResource AccB}"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Width="180"
+                            Height="36"
+                            HorizontalAlignment="Left"/>
+                    <Button Content="Move Up"
+                            Command="{Binding MoveSongUpCommand}"
+                            Margin="8,0,0,0"
+                            Width="100"
+                            Height="36"/>
+                    <Button Content="Move Down"
+                            Command="{Binding MoveSongDownCommand}"
+                            Margin="8,0,0,0"
+                            Width="110"
+                            Height="36"/>
+                    <Button Content="Remove"
+                            Command="{Binding RemoveSongCommand}"
+                            Margin="8,0,0,0"
+                            Width="90"
+                            Height="36"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
 
@@ -45,6 +62,16 @@
                   GridLinesVisibility="Horizontal"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Play" IsEnabled="False"/>
+                    <MenuItem Header="Edit..." IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="Move Up" Command="{Binding MoveSongUpCommand}"/>
+                    <MenuItem Header="Move Down" Command="{Binding MoveSongDownCommand}"/>
+                    <MenuItem Header="Remove from Playlist" Command="{Binding RemoveSongCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="52" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>

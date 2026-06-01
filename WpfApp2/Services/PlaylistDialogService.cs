@@ -9,7 +9,17 @@ public class PlaylistDialogService : IPlaylistDialogService
 {
     public Playlist? ShowCreatePlaylistDialog()
     {
-        var viewModel = new AddPlaylistViewModel();
+        return ShowPlaylistDialog(null);
+    }
+
+    public Playlist? ShowEditPlaylistDialog(Playlist playlist)
+    {
+        return ShowPlaylistDialog(playlist);
+    }
+
+    private static Playlist? ShowPlaylistDialog(Playlist? playlist)
+    {
+        var viewModel = new PlaylistEditViewModel(playlist);
         var dialog = new AddWindow
         {
             Owner = Application.Current?.MainWindow,

@@ -9,6 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Mvvm\**" />
+    <EmbeddedResource Remove="Mvvm\**" />
+    <None Remove="Mvvm\**" />
+    <Page Remove="Mvvm\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="taglib" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\vinyl.ico" />
     <None Remove="Resources\vinyl.png" />
   </ItemGroup>
@@ -16,10 +27,6 @@
   <ItemGroup>
     <Resource Include="Resources\vinyl.ico" />
     <Resource Include="Resources\vinyl.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Mvvm\" />
   </ItemGroup>
 
 </Project>
