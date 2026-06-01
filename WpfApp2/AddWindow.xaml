@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Playlist" Height="220" Width="360"
         ResizeMode="NoResize"
-        Icon="/Resources/vinyl.ico">
+        Icon="/Resources/vinyl.ico"
+        WindowStartupLocation="CenterOwner">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -21,22 +22,47 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Border Background="LightGray" Width="80" Height="80">
-                <Image x:Name="Preview" Stretch="UniformToFill"/>
+                <Grid>
+                    <Image x:Name="Preview" Stretch="UniformToFill"/>
+                    <TextBlock Text="No Cover" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=Preview, Path=Source}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
             </Border>
             <Border Background="Transparent" CornerRadius="15" Height="10"/>
-            <Button Width="80" Click="BrowseAndAdd">Browse</Button>
+            <Button Width="110" Click="BrowseAndAdd">Browse cover...</Button>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="1">
             <TextBlock Grid.Row="0" Text="Name" FontSize="14" Foreground="Gray" />
             <Border Background="Transparent" Height="5"/>
-            <TextBox Grid.Row="1" Width="180" Height="30" HorizontalAlignment="Left"/>
+            <TextBox x:Name="PlaylistNameTextBox" Grid.Row="1" Width="180" Height="30" HorizontalAlignment="Left"/>
         </StackPanel>
 
 
         <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
 
             <Button Click="Cancel" Margin="10" Width="60" Height="20">Cancel</Button>
-            <Button Click="AddPlaylist" Margin="10" Width="60" Height="20" Background="{StaticResource AccB}">Add</Button>
+            <Button Click="AddPlaylist" Margin="10" Width="60" Height="20" Background="{StaticResource AccB}">Save
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=PlaylistNameTextBox, Path=Text}" Value="">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
         </StackPanel>
     </Grid>

@@ -32,15 +32,185 @@
                     <MenuItem Header="_Delete" Command="Delete"/>
                 </MenuItem>
                 <MenuItem Header="_Playlist">
-                    <MenuItem Header="_New" Click="OpenAddWindow"/>
+                    <MenuItem Header="_New..." Click="OpenAddWindow"/>
                 </MenuItem>
             </Menu>
             <TextBox AcceptsReturn="True" />
         </DockPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Background="{StaticResource BrushBackground}">
             <TextBlock FontSize="18" Padding="7" Margin="10" Foreground="White"><Bold>All Songs</Bold></TextBlock>
+            <Grid Margin="10,0,10,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock FontSize="14" Foreground="White" VerticalAlignment="Center"><Bold>Playlists</Bold></TextBlock>
+                <Button Grid.Column="1"
+                        Width="22"
+                        Height="22"
+                        Content="+"
+                        FontWeight="Bold"
+                        Background="{StaticResource AccB}"
+                        BorderThickness="0"
+                        Click="OpenAddWindow"/>
+            </Grid>
+            <ListBox x:Name="PlaylistsList"
+                     Margin="10,0,10,10"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     Foreground="White"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,0,4"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource AccB}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Background}"
+                                
+                                Padding="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="36"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Width="36"
+                                        Height="36"
+                                        CornerRadius="6"
+                                        ClipToBounds="True"
+                                        Background="#557A7A7A">
+                                    <Image Source="{Binding CoverPath}" Stretch="UniformToFill"/>
+                                </Border>
+
+                                <TextBlock Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Margin="10,0,0,0"
+                                           Text="{Binding Name}"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
-        <Grid Grid.Row="1" Grid.Column="1"></Grid>
-        <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource BgBrush2}"/>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="120"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Height="34"
+                         VerticalContentAlignment="Center"
+                         Padding="10,0"
+                         FontSize="20"
+                         Text="Search songs..."
+                         Foreground="Gray"/>
+                <Button Grid.Column="2"
+                        Content="Import Songs"
+                        Background="{StaticResource AccB}"
+                        BorderThickness="0"
+                        Foreground="White"
+                        FontSize="18"/>
+            </Grid>
+
+            <DataGrid x:Name="SongsDataGrid"
+                      Grid.Row="2"
+                      IsReadOnly="True"
+                      SelectionUnit="FullRow"
+                      AutoGenerateColumns="False"
+                      SelectionChanged="SongsDataGrid_SelectionChanged"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="52" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Width="42" Height="42" CornerRadius="4" ClipToBounds="True" Background="#557A7A7A" Margin="2">
+                                    <Image Source="{Binding CoverPath}" Stretch="UniformToFill"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*"/>
+                    <DataGridTextColumn Header="Album" Binding="{Binding Album}" Width="*"/>
+                    <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="*"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat={}{0:m\\:ss}}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource BgBrush2}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="180"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="8,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="44"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="40" Height="40" CornerRadius="4" Background="#557A7A7A" ClipToBounds="True">
+                    <Image x:Name="CurrentSongCover" Stretch="UniformToFill"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="CurrentSongTitleText" Foreground="White" FontSize="14" FontWeight="Bold" Text="-"/>
+                    <TextBlock x:Name="CurrentSongArtistText" Foreground="#D0D0D0" FontSize="12" Text="-"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Column="1" Margin="8,2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="❮❮" Foreground="White" FontSize="18" Margin="8,0"/>
+                    <TextBlock Text="▶" Foreground="White" FontSize="24" Margin="8,0"/>
+                    <TextBlock Text="❯❯" Foreground="White" FontSize="18" Margin="8,0"/>
+                </StackPanel>
+                <Grid Grid.Row="1" Margin="0,1,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="CurrentTimeText" Text="0:00" Foreground="#D0D0D0" VerticalAlignment="Center" FontSize="12"/>
+                    <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="0" Height="14" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="0:00" Foreground="#D0D0D0" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
+                </Grid>
+            </Grid>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0">
+                <TextBlock Text="🔊" Foreground="White" FontSize="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                <Slider Width="90" Minimum="0" Maximum="100" Value="45" Height="14" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
