@@ -14,6 +14,12 @@
         <DataTemplate DataType="{x:Type vm:WelcomeViewModel}">
             <views:WelcomeView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SongListViewModel}">
+            <views:SongListView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PlaylistViewModel}">
+            <views:PlaylistView/>
+        </DataTemplate>
 
         <Style x:Key="LoadedOnlyVisibilityStyle" TargetType="FrameworkElement">
             <Setter Property="Visibility" Value="Visible"/>
@@ -54,7 +60,9 @@
             <TextBox AcceptsReturn="True" />
         </DockPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Background="{StaticResource BrushBackground}" Style="{StaticResource LoadedOnlyVisibilityStyle}">
-            <TextBlock FontSize="18" Padding="7" Margin="10" Foreground="White"><Bold>All Songs</Bold></TextBlock>
+            <Button Command="{Binding ShowSongListCommand}" Margin="10" Padding="7" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left">
+                <TextBlock FontSize="18" Foreground="White"><Bold>All Songs</Bold></TextBlock>
+            </Button>
             <Grid Margin="10,0,10,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -76,6 +84,7 @@
                      Background="Transparent"
                      Foreground="White"
                      ItemsSource="{Binding Playlists}"
+                     SelectedItem="{Binding SelectedPlaylist, Mode=TwoWay}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
@@ -125,62 +134,10 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
-        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,10,0" Style="{StaticResource LoadedOnlyVisibilityStyle}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="10"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="120"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Height="34"
-                         VerticalContentAlignment="Center"
-                         Padding="10,0"
-                         FontSize="20"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Foreground="Gray"/>
-                <Button Grid.Column="2"
-                        Content="Import Songs"
-                        Background="{StaticResource AccB}"
-                        BorderThickness="0"
-                        Foreground="White"
-                        FontSize="18"/>
-            </Grid>
-
-            <DataGrid x:Name="SongsDataGrid"
-                      Grid.Row="2"
-                      IsReadOnly="True"
-                      SelectionUnit="FullRow"
-                      AutoGenerateColumns="False"
-                      ItemsSource="{Binding Songs}"
-                      SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Width="52" IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border Width="42" Height="42" CornerRadius="4" ClipToBounds="True" Background="#557A7A7A" Margin="2">
-                                    <Image Source="{Binding CoverPath}" Stretch="UniformToFill"/>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
-                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*"/>
-                    <DataGridTextColumn Header="Album" Binding="{Binding Album}" Width="*"/>
-                    <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="*"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat={}{0:m\\:ss}}" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+        <ContentControl Grid.Row="1"
+                        Grid.Column="1"
+                        Content="{Binding CurrentPage}"
+                        Style="{StaticResource LoadedOnlyVisibilityStyle}"/>
 
         <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource BgBrush2}" Style="{StaticResource LoadedOnlyVisibilityStyle}">
             <Grid.ColumnDefinitions>

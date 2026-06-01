@@ -18,12 +18,15 @@ public class MainWindowViewModel : BaseViewModel
     private readonly IPlaylistDialogService _playlistDialogService;
     private readonly ILibraryService _libraryService;
     private readonly RelayCommand _openAddPlaylistCommand;
+    private readonly RelayCommand _showSongListCommand;
     private readonly RelayCommand _saveLibraryCommand;
     private bool _isHydratingLibrary;
     private bool _isLibraryLoaded;
+    private object? _currentPage;
+    private Playlist? _selectedPlaylist;
     private Song? _selectedSong;
-    private string _searchText = string.Empty;
     private string _currentTimeText = "0:00";
+    private readonly SongListViewModel _songListPage;
 
     public MainWindowViewModel(IPlaylistDialogService playlistDialogService, ILibraryService libraryService, string? initialLibraryPath = null)
     {
@@ -32,6 +35,7 @@ public class MainWindowViewModel : BaseViewModel
 
         Songs = new ObservableCollection<Song>();
         Playlists = new ObservableCollection<Playlist>();
+        _songListPage = new SongListViewModel(Songs, OnSelectedSongChangedFromPage);
 
         CreateLibraryCommand = new RelayCommand(CreateLibrary);
         OpenLibraryCommand = new RelayCommand(OpenLibrary);
@@ -39,7 +43,10 @@ public class MainWindowViewModel : BaseViewModel
         SaveLibraryCommand = _saveLibraryCommand;
         _openAddPlaylistCommand = new RelayCommand(OpenAddPlaylist, () => IsLibraryLoaded);
         OpenAddPlaylistCommand = _openAddPlaylistCommand;
+        _showSongListCommand = new RelayCommand(ShowSongList, () => IsLibraryLoaded);
+        ShowSongListCommand = _showSongListCommand;
         WelcomePage = new WelcomeViewModel(CreateLibraryCommand, OpenLibraryCommand);
+        CurrentPage = WelcomePage;
 
         Songs.CollectionChanged += OnLibraryCollectionChanged;
         Playlists.CollectionChanged += OnLibraryCollectionChanged;
@@ -59,7 +66,33 @@ public class MainWindowViewModel : BaseViewModel
     public ICommand OpenLibraryCommand { get; }
     public ICommand SaveLibraryCommand { get; }
     public ICommand OpenAddPlaylistCommand { get; }
+    public ICommand ShowSongListCommand { get; }
     public WelcomeViewModel WelcomePage { get; }
+
+    public object? CurrentPage
+    {
+        get => _currentPage;
+        private set => SetProperty(ref _currentPage, value);
+    }
+
+    public Playlist? SelectedPlaylist
+    {
+        get => _selectedPlaylist;
+        set
+        {
+            if (SetProperty(ref _selectedPlaylist, value))
+            {
+                if (!IsLibraryLoaded)
+                {
+                    return;
+                }
+
+                CurrentPage = value is null
+                    ? _songListPage
+                    : new PlaylistViewModel(value, Songs, OnSelectedSongChangedFromPage);
+            }
+        }
+    }
 
     public bool IsLibraryLoaded
     {
@@ -69,15 +102,10 @@ public class MainWindowViewModel : BaseViewModel
             if (SetProperty(ref _isLibraryLoaded, value))
             {
                 _openAddPlaylistCommand.RaiseCanExecuteChanged();
+                _showSongListCommand.RaiseCanExecuteChanged();
                 _saveLibraryCommand.RaiseCanExecuteChanged();
             }
         }
-    }
-
-    public string SearchText
-    {
-        get => _searchText;
-        set => SetProperty(ref _searchText, value);
     }
 
     public Song? SelectedSong
@@ -138,9 +166,11 @@ public class MainWindowViewModel : BaseViewModel
         _isHydratingLibrary = true;
         Songs.Clear();
         Playlists.Clear();
+        SelectedPlaylist = null;
         SelectedSong = null;
         _isHydratingLibrary = false;
         IsLibraryLoaded = true;
+        CurrentPage = _songListPage;
         SaveCurrentStateToLibrary();
         _saveLibraryCommand.RaiseCanExecuteChanged();
     }
@@ -165,6 +195,7 @@ public class MainWindowViewModel : BaseViewModel
         _libraryService.OpenLibrary(filePath);
         LoadStateFromLibrary();
         IsLibraryLoaded = true;
+        CurrentPage = _songListPage;
         _saveLibraryCommand.RaiseCanExecuteChanged();
     }
 
@@ -193,11 +224,28 @@ public class MainWindowViewModel : BaseViewModel
         Playlists.Clear();
         foreach (var playlist in library.Playlists)
         {
-            Playlists.Add(new Playlist(playlist.Name, "/Resources/vinyl.ico"));
+            Playlists.Add(new Playlist(playlist.Name, "/Resources/vinyl.ico", playlist.SongIds));
         }
 
+        SelectedPlaylist = null;
         SelectedSong = Songs.Count > 0 ? Songs[0] : null;
         _isHydratingLibrary = false;
+    }
+
+    private void ShowSongList()
+    {
+        if (!IsLibraryLoaded)
+        {
+            return;
+        }
+
+        SelectedPlaylist = null;
+        CurrentPage = _songListPage;
+    }
+
+    private void OnSelectedSongChangedFromPage(Song? song)
+    {
+        SelectedSong = song;
     }
 
     private bool CanSaveLibrary()
@@ -249,7 +297,7 @@ public class MainWindowViewModel : BaseViewModel
                 {
                     Name = playlist.Name,
                     CoverDataBase64 = TryReadFileToBase64(playlist.CoverPath),
-                    SongIds = new List<int>()
+                    SongIds = playlist.SongIds.ToList()
                 })
                 .ToList()
         };

@@ -16,21 +16,7 @@ public class PlaylistDialogService : IPlaylistDialogService
             DataContext = viewModel
         };
 
-        void OnRequestClose(bool? result)
-        {
-            dialog.DialogResult = result;
-        }
-
-        viewModel.RequestClose += OnRequestClose;
-
-        try
-        {
-            var result = dialog.ShowDialog();
-            return result == true ? viewModel.CreatedPlaylist : null;
-        }
-        finally
-        {
-            viewModel.RequestClose -= OnRequestClose;
-        }
+        var result = dialog.ShowDialog();
+        return result == true ? viewModel.CreatedPlaylist : null;
     }
 }
