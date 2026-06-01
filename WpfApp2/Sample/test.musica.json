@@ -1,0 +1,47 @@
+{
+  "Songs": [
+    {
+      "Id": 1,
+      "Title": "MAKKA",
+      "Artist": "fakemink",
+      "Album": "",
+      "Genre": "Cloud Rap",
+      "Year": 2025,
+      "DurationSeconds": 180,
+      "AudioFileExtension": ".mp3",
+      "CoverDataBase64": null,
+      "AudioDataBase64": ""
+    },
+    {
+      "Id": 2,
+      "Title": "Satanic Rites of Drugula",
+      "Artist": "Electric Wizard",
+      "Album": "Witchcult Today",
+      "Genre": "Stoner Metal",
+      "Year": 2007,
+      "DurationSeconds": 367,
+      "AudioFileExtension": ".mp3",
+      "CoverDataBase64": null,
+      "AudioDataBase64": ""
+    },
+    {
+      "Id": 3,
+      "Title": "SUFFERING BRINGS WISDOM",
+      "Artist": "Crowbar",
+      "Album": "Sonic Excess In Its Purest Form",
+      "Genre": "Sludge Metal",
+      "Year": 2003,
+      "DurationSeconds": 327,
+      "AudioFileExtension": ".mp3",
+      "CoverDataBase64": null,
+      "AudioDataBase64": ""
+    }
+  ],
+  "Playlists": [
+    {
+      "Name": "Ulubione",
+      "CoverDataBase64": null,
+      "SongIds": [1, 2, 3]
+    }
+  ]
+}
