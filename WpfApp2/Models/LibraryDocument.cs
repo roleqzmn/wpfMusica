@@ -18,13 +18,13 @@ public class SongDocument
     public int Year { get; set; }
     public double DurationSeconds { get; set; }
     public string AudioFileExtension { get; set; } = ".mp3";
-    public string? CoverDataBase64 { get; set; }
+    public string? CoverPath { get; set; }
     public string AudioDataBase64 { get; set; } = string.Empty;
 }
 
 public class PlaylistDocument
 {
     public string Name { get; set; } = string.Empty;
-    public string? CoverDataBase64 { get; set; }
+    public string? CoverPath { get; set; }
     public List<int> SongIds { get; set; } = new();
 }

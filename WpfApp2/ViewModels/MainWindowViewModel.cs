@@ -441,7 +441,9 @@ public class MainWindowViewModel : BaseViewModel
         Songs.Clear();
         foreach (var song in library.Songs)
         {
-            var coverData = DecodeBase64(song.CoverDataBase64);
+            var coverPath = string.IsNullOrWhiteSpace(song.CoverPath)
+                ? "/Resources/vinyl.ico"
+                : song.CoverPath;
             Songs.Add(new Song(
                 song.Id,
                 song.Title,
@@ -451,16 +453,18 @@ public class MainWindowViewModel : BaseViewModel
                 song.Year,
                 TimeSpan.FromSeconds(song.DurationSeconds),
                 string.IsNullOrWhiteSpace(song.AudioFileExtension) ? ".mp3" : song.AudioFileExtension,
-                CreateCoverPath(coverData),
-                coverData,
+                coverPath,
+                null,
                 DecodeBase64(song.AudioDataBase64) ?? Array.Empty<byte>()));
         }
 
         Playlists.Clear();
         foreach (var playlist in library.Playlists)
         {
-            var playlistCoverData = DecodeBase64(playlist.CoverDataBase64);
-            Playlists.Add(new Playlist(playlist.Name, CreateCoverPath(playlistCoverData), playlist.SongIds));
+            var playlistCoverPath = string.IsNullOrWhiteSpace(playlist.CoverPath)
+                ? "/Resources/vinyl.ico"
+                : playlist.CoverPath;
+            Playlists.Add(new Playlist(playlist.Name, playlistCoverPath, playlist.SongIds));
         }
 
         SelectedPlaylist = null;
@@ -584,7 +588,7 @@ public class MainWindowViewModel : BaseViewModel
                     Year = song.Year,
                     DurationSeconds = song.Duration.TotalSeconds,
                     AudioFileExtension = song.AudioFileExtension,
-                    CoverDataBase64 = ToBase64(song.CoverData),
+                    CoverPath = song.CoverPath,
                     AudioDataBase64 = ToBase64(song.AudioData) ?? string.Empty
                 })
                 .ToList(),
@@ -592,7 +596,7 @@ public class MainWindowViewModel : BaseViewModel
                 .Select(playlist => new PlaylistDocument
                 {
                     Name = playlist.Name,
-                    CoverDataBase64 = TryReadFileToBase64(playlist.CoverPath),
+                    CoverPath = playlist.CoverPath,
                     SongIds = playlist.SongIds.ToList()
                 })
                 .ToList()
@@ -600,16 +604,6 @@ public class MainWindowViewModel : BaseViewModel
 
         _libraryService.SetLibrary(document);
         _libraryService.SaveLibrary();
-    }
-
-    private static string? TryReadFileToBase64(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-        {
-            return null;
-        }
-
-        return Convert.ToBase64String(File.ReadAllBytes(path));
     }
 
     private static string? ToBase64(byte[]? data)
